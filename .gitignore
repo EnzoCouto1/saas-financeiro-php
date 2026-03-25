@@ -1,0 +1,9 @@
+# Ignora arquivos de configuração do VS Code ou outros editores
+.vscode/
+.idea/
+
+# Ignora dependências do PHP (quando usarmos o Composer no futuro)
+vendor/
+
+# Ignora arquivos de log
+*.log
