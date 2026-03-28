@@ -49,4 +49,28 @@ class Usuario {
         
         return $stmt->fetchAll();
     }
+
+    // Método para autenticar (fazer login)
+    public function autenticar($email, $senha_digitada) {
+        // 1. Buscamos o usuário pelo e-mail
+        $query = "SELECT id, empresa_id, nome, senha_hash FROM usuarios WHERE email = :email LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':email', $email);
+        $stmt->execute();
+        
+        $usuario = $stmt->fetch();
+
+        // 2. Se o e-mail existir, verificamos se a senha bate com o Hash do banco
+        if ($usuario) {
+            // A função password_verify faz a mágica de comparar o texto puro com o hash BCRYPT
+            if (password_verify($senha_digitada, $usuario['senha_hash'])) {
+                // Senha correta! Retornamos os dados do usuário (menos a senha, por segurança)
+                unset($usuario['senha_hash']); 
+                return $usuario;
+            }
+        }
+        
+        // E-mail não encontrado ou senha incorreta
+        return false;
+    }
 }

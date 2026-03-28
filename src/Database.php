@@ -1,36 +1,45 @@
 <?php
 
 class Database {
-    // Configurações do seu PostgreSQL
-    private $host = 'localhost';
-    private $port = '5432';
-    private $db   = 'saas_financeiro';
-    private $user = 'postgres'; 
-    private $pass = 'admin123'; 
-    
-    private $pdo;
+    private $host;
+    private $port;
+    private $db_name;
+    private $username;
+    private $password;
+    private $conn;
+
+    public function __construct() {
+        // Lê o arquivo .env e transforma as linhas em um array
+        $envPath = __DIR__ . '/../.env';
+        
+        if (file_exists($envPath)) {
+            $env = parse_ini_file($envPath);
+            $this->host = $env['DB_HOST'] ?? 'localhost';
+            $this->port = $env['DB_PORT'] ?? '5432';
+            $this->db_name = $env['DB_NAME'] ?? 'saas_financeiro';
+            $this->username = $env['DB_USER'] ?? 'postgres';
+            $this->password = $env['DB_PASS'] ?? '';
+        } else {
+            die("Erro crítico: Arquivo .env não encontrado. Crie um baseado no .env.example");
+        }
+    }
 
     public function connect() {
-        if ($this->pdo === null) {
-            try {
-                // A string de conexão (DSN) específica para PostgreSQL
-                $dsn = "pgsql:host={$this->host};port={$this->port};dbname={$this->db}";
-                
-                // Opções para tratamento de erros e formato de retorno
-                $options = [
-                    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                    PDO::ATTR_EMULATE_PREPARES   => false,
-                ];
+        $this->conn = null;
 
-                $this->pdo = new PDO($dsn, $this->user, $this->pass, $options);
-                
-            } catch (PDOException $e) {
-                // Em produção, você não deve mostrar o erro real na tela, 
-                // mas para desenvolvimento isso ajuda a debugar.
-                die("Erro de conexão com o banco de dados: " . $e->getMessage());
-            }
+        try {
+            $dsn = "pgsql:host=" . $this->host . ";port=" . $this->port . ";dbname=" . $this->db_name;
+            $this->conn = new PDO($dsn, $this->username, $this->password);
+            
+            // Configura o PDO para lançar exceções em caso de erro (ajuda muito a debugar)
+            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+            
+        } catch(PDOException $e) {
+            // Em produção, nós salvaríamos o erro em um log, mas não mostraríamos na tela.
+            echo "Erro de conexão com o banco de dados. " . $e->getMessage();
         }
-        return $this->pdo;
+
+        return $this->conn;
     }
 }
