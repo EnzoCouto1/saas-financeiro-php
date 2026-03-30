@@ -4,33 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - SaaS Financeiro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { font-family: Arial, sans-serif; background-color: #e9ecef; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .login-box { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); width: 100%; max-width: 400px; }
-        .login-box h2 { text-align: center; margin-bottom: 20px; color: #333; }
-        input[type="email"], input[type="password"] { width: 100%; padding: 12px; margin: 10px 0 20px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-        button { width: 100%; padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: bold; }
-        button:hover { background-color: #0056b3; }
-        .erro { background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px; margin-bottom: 15px; text-align: center; }
+        body { background-color: #f4f6f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .login-box { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
     </style>
 </head>
 <body>
 
 <div class="login-box">
-    <h2>Entrar no Sistema</h2>
-    
+    <h3 class="text-center mb-4 text-primary fw-bold">📊 SaaS Financeiro</h3>
+
+    <?php 
+    if (isset($_SESSION['mensagem_sucesso'])) {
+        echo '<div class="alert alert-success">' . $_SESSION['mensagem_sucesso'] . '</div>';
+        unset($_SESSION['mensagem_sucesso']); // Limpa a mensagem depois de mostrar
+    }
+    ?>
+
     <?php if (isset($erro)): ?>
-        <div class="erro"><?php echo $erro; ?></div>
+        <div class="alert alert-danger"><?php echo $erro; ?></div>
     <?php endif; ?>
 
     <form action="login.php" method="POST">
-        <label for="email">E-mail:</label>
-        <input type="email" id="email" name="email" required placeholder="Seu e-mail cadastrado">
+        <div class="mb-3">
+            <label for="email" class="form-label text-muted">E-mail</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+        </div>
 
-        <label for="senha">Senha:</label>
-        <input type="password" id="senha" name="senha" required placeholder="Sua senha">
+        <div class="mb-4">
+            <label for="senha" class="form-label text-muted">Senha</label>
+            <input type="password" class="form-control" id="senha" name="senha" required>
+        </div>
         
-        <button type="submit">Entrar</button>
+        <button type="submit" class="btn btn-primary w-100 fw-bold py-2">Entrar</button>
+
+        <div class="text-center mt-3">
+            <a href="registro.php" class="text-decoration-none">Não tem uma conta? Cadastre-se</a>
+        </div>
     </form>
 </div>
 

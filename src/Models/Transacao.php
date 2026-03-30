@@ -68,4 +68,59 @@ class Transacao {
             'saldo' => $saldo
         ];
     }
+
+    // Agora salva o Produto ID e a Quantidade
+    public function registrarNaComanda($empresa_id, $usuario_id, $cliente_id, $categoria_id, $descricao, $valor, $data_transacao, $produto_id = null, $quantidade = 1) {
+        $query = "INSERT INTO transacoes (empresa_id, usuario_id, cliente_id, categoria_id, produto_id, quantidade, descricao, valor, tipo, data_transacao) 
+                  VALUES (:empresa_id, :usuario_id, :cliente_id, :categoria_id, :produto_id, :quantidade, :descricao, :valor, 'Entrada', :data_transacao)";
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':empresa_id', $empresa_id);
+        $stmt->bindParam(':usuario_id', $usuario_id);
+        $stmt->bindParam(':cliente_id', $cliente_id);
+        $stmt->bindParam(':categoria_id', $categoria_id);
+        $stmt->bindParam(':produto_id', $produto_id);
+        $stmt->bindParam(':quantidade', $quantidade);
+        $stmt->bindParam(':descricao', $descricao);
+        $stmt->bindParam(':valor', $valor);
+        $stmt->bindParam(':data_transacao', $data_transacao);
+        
+        return $stmt->execute();
+    }
+
+    // Busca uma transação específica (Usaremos para saber o que devolver pro estoque)
+    public function buscarPorId($id, $empresa_id) {
+        $query = "SELECT * FROM transacoes WHERE id = :id AND empresa_id = :empresa_id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id);
+        $stmt->bindParam(':empresa_id', $empresa_id);
+        $stmt->execute();
+        return $stmt->fetch();
+    }
+
+    // Busca o "extrato" apenas daquela mesa/cliente
+    public function listarPorCliente($cliente_id, $empresa_id) {
+        $query = "SELECT t.*, c.nome as categoria_nome 
+                  FROM transacoes t
+                  JOIN categorias c ON t.categoria_id = c.id
+                  WHERE t.cliente_id = :cliente_id AND t.empresa_id = :empresa_id 
+                  ORDER BY t.id DESC";
+                  
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':cliente_id', $cliente_id);
+        $stmt->bindParam(':empresa_id', $empresa_id);
+        $stmt->execute();
+        
+        return $stmt->fetchAll();
+    }
+
+
+    // Exclui um item lançado errado (Garante que só apaga se for da sua empresa)
+    public function excluirItem($id, $empresa_id) {
+        $query = "DELETE FROM transacoes WHERE id = :id AND empresa_id = :empresa_id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id);
+        $stmt->bindParam(':empresa_id', $empresa_id);
+        return $stmt->execute();
+    }
 }

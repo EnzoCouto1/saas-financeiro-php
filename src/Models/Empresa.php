@@ -12,14 +12,13 @@ class Empresa {
 
     // Método para cadastrar uma nova empresa
     public function criar($nome_fantasia) {
-        // Usamos prepared statements (bindParam) para evitar SQL Injection!
         $query = "INSERT INTO empresas (nome_fantasia) VALUES (:nome_fantasia)";
-        
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':nome_fantasia', $nome_fantasia);
         
         if ($stmt->execute()) {
-            return true;
+            // O pulo do gato: retorna o ID que o banco acabou de gerar!
+            return $this->conn->lastInsertId();
         }
         return false;
     }
